@@ -1,0 +1,48 @@
+﻿@using System.Data
+@model DataTable
+
+@{
+    ViewBag.Title = "Список заявок - БытСервис";
+}
+<div class="container">
+    <h2>Учет заявок на ремонт техники</h2>
+
+    <form method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Поиск по номеру или модели..." />
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </div>
+    </form>
+
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>№</th>
+                <th>Дата</th>
+                <th>Техника</th>
+                <th>Модель</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (DataRow row in Model.Rows)
+            {
+                <tr>
+                    <td>@row["requestID"]</td>
+                    <td>@Convert.ToDateTime(row["startDate"]).ToShortDateString()</td>
+                    <td>@row["homeTechType"]</td>
+                    <td>@row["homeTechModel"]</td>
+                    <td>
+                        <span class="badge @(row["requestStatus"].ToString() == "Готова к выдаче" ? "bg-success" : "bg-warning")">
+                            @row["requestStatus"]
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/List/Edit/@row["requestID"]" class="btn btn-sm btn-info">Редактировать</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

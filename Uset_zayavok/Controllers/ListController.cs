@@ -1,32 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using System.Data;
+using Uset_zayavok.Models;
+using System.Linq;
 
-public class ListController : Controller
+namespace Uset_zayavok.Controllers
 {
-  
-
-    public DataTable GetRequests()
+    public class ListController : Controller
     {
-        DataTable dt = new DataTable();
-        using (NpgsqlConnection conn = new NpgsqlConnection(connString)) // Передаем строку сюда
+        private readonly ApplicationDbContext _context;
+
+        public ListController(ApplicationDbContext context)
         {
-            conn.Open();
-            string sql = "SELECT * FROM Requests";
-            using (NpgsqlCommand cmd = new NpgsqlCommand(sql, conn))
-            {
-                using (NpgsqlDataReader reader = cmd.ExecuteReader())
-                {
-                    dt.Load(reader);
-                }
-            }
+            _context = context;
         }
-        return dt;
-    }
 
-    public IActionResult Index()
-    {
-        var data = GetRequests();
-        return View(data);
+        public IActionResult Index(string search)
+        {
+            // Получаем все заявки из базы
+            var requests = _context.Requests.AsQueryable();
+
+            // Если есть текст поиска (требование 2.3), фильтруем
+            if (!string.IsNullOrEmpty(search))
+            {
+                requests = requests.Where(r => r.Hometechmodel.Contains(search) ||
+                                              r.Requestid.ToString() == search);
+            }
+
+            return View(requests.ToList()); // Передаем список объектов в HTML
+        }
     }
 }

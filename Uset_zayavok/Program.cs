@@ -1,7 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using Uset_zayavok;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql("Host=localhost;Username=postgres;Password=123456789;Database=postgres"));
 
 var app = builder.Build();
 

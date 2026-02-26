@@ -1,6 +1,13 @@
-﻿namespace Uset_zayavok.Controllers
+﻿using Microsoft.EntityFrameworkCore;
+using Uset_zayavok.Models;
+
+namespace Uset_zayavok
 {
-    public class ApplicationDbContext
+    public class ApplicationDbContext : DbContext
     {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options) { }
+
+        public DbSet<Request> Requests { get; set; }
     }
 }

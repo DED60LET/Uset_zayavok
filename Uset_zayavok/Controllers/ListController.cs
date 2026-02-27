@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Uset_zayavok.Data;
+
 using Uset_zayavok.Models;
 
 
@@ -8,9 +8,9 @@ namespace Uset_zayavok.Controllers
 {
     public class ListController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly PostgresContext _context;
 
-        public ListController(ApplicationDbContext context)
+        public ListController(PostgresContext context)
         {
             _context = context;
         }

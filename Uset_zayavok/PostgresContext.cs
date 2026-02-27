@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Uset_zayavok.Models;
 
 namespace Uset_zayavok;
 

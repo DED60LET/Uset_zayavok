@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Uset_zayavok.Models;
 using System.Linq;
+using Uset_zayavok.Data;
 
 namespace Uset_zayavok.Controllers
 {
@@ -15,17 +16,15 @@ namespace Uset_zayavok.Controllers
 
         public IActionResult Index(string search)
         {
-            // Получаем все заявки из базы
             var requests = _context.Requests.AsQueryable();
 
-            // Если есть текст поиска (требование 2.3), фильтруем
             if (!string.IsNullOrEmpty(search))
             {
                 requests = requests.Where(r => r.Hometechmodel.Contains(search) ||
-                                              r.Requestid.ToString() == search);
+                                             r.Requestid.ToString() == search);
             }
 
-            return View(requests.ToList()); // Передаем список объектов в HTML
+            return View(requests.ToList());
         }
     }
-}
+} 

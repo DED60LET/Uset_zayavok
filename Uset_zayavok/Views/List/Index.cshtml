@@ -1,9 +1,9 @@
-﻿@using System.Data
-@model DataTable
+﻿@model IEnumerable<Uset_zayavok.Models.Request>
 
 @{
     ViewBag.Title = "Список заявок - БытСервис";
 }
+
 <div class="container">
     <h2>Учет заявок на ремонт техники</h2>
 
@@ -26,20 +26,22 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (DataRow row in Model.Rows)
+            @foreach (var item in Model)
             {
                 <tr>
-                    <td>@row["requestID"]</td>
-                    <td>@Convert.ToDateTime(row["startDate"]).ToShortDateString()</td>
-                    <td>@row["homeTechType"]</td>
-                    <td>@row["homeTechModel"]</td>
+                    @* Обращаемся к свойствам объекта напрямую через точку *@
+                    <td>@item.Requestid</td>
+                    <td>@(item.Startdate?.ToShortDateString() ?? "-")</td>
+                    <td>@item.Hometechtype</td>
+                    <td>@item.Hometechmodel</td>
                     <td>
-                        <span class="badge @(row["requestStatus"].ToString() == "Готова к выдаче" ? "bg-success" : "bg-warning")">
-                            @row["requestStatus"]
+                        @* Логика смены цвета бейджа в зависимости от статуса *@
+                        <span class="badge @(item.Requeststatus == "Готова к выдаче" ? "bg-success" : "bg-warning")">
+                            @item.Requeststatus
                         </span>
                     </td>
                     <td>
-                        <a href="/List/Edit/@row["requestID"]" class="btn btn-sm btn-info">Редактировать</a>
+                        <a asp-action="Edit" asp-route-id="@item.Requestid" class="btn btn-sm btn-info">Редактировать</a>
                     </td>
                 </tr>
             }

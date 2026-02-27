@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Uset_zayavok;
+using Uset_zayavok.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

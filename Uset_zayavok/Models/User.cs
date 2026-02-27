@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Uset_zayavok;
+namespace Uset_zayavok.Models;
 
 public partial class User
 {

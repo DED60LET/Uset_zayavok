@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Uset_zayavok.Models;
 
-namespace Uset_zayavok.Data // Убедись, что namespace верный
+namespace Uset_zayavok.Data
 {
     public class ApplicationDbContext : DbContext
     {
@@ -10,7 +10,6 @@ namespace Uset_zayavok.Data // Убедись, что namespace верный
         {
         }
 
-        // Твои таблицы
         public DbSet<Request> Requests { get; set; }
         public DbSet<User> Users { get; set; }
 
@@ -18,9 +17,26 @@ namespace Uset_zayavok.Data // Убедись, что namespace верный
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.ToTable("users");
+                entity.HasKey(e => e.Userid);
+                entity.Property(e => e.Userid).HasColumnName("userid");
+                entity.Property(e => e.Fio).HasColumnName("fio");
+                entity.Property(e => e.Phone).HasColumnName("phone");
+                entity.Property(e => e.Login).HasColumnName("login");
+                entity.Property(e => e.Password).HasColumnName("password");
+                entity.Property(e => e.Type).HasColumnName("type");
+            });
+
             modelBuilder.Entity<Request>(entity =>
             {
+
+                entity.ToTable("requests");
+                entity.HasKey(e => e.Requestid);
                 entity.Property(e => e.Requestid).HasColumnName("requestid");
+                entity.Ignore("Userid");
+                entity.Ignore("Userid1");
                 entity.Property(e => e.Startdate).HasColumnName("startdate");
                 entity.Property(e => e.Hometechtype).HasColumnName("hometechtype");
                 entity.Property(e => e.Hometechmodel).HasColumnName("hometechmodel");
@@ -32,31 +48,17 @@ namespace Uset_zayavok.Data // Убедись, что namespace верный
                 entity.Property(e => e.Clientid).HasColumnName("clientid");
             });
 
-           
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.Property(e => e.Userid).HasColumnName("userid");
-                entity.Property(e => e.Fio).HasColumnName("fio");
-                entity.Property(e => e.Phone).HasColumnName("phone");
-                entity.Property(e => e.Login).HasColumnName("login");
-                entity.Property(e => e.Password).HasColumnName("password");
-                entity.Property(e => e.Type).HasColumnName("type");
-            });
-
-
             modelBuilder.Entity<Request>()
                 .HasOne(r => r.Client)
                 .WithMany()
-                .HasForeignKey(r => r.Clientid) 
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(r => r.Clientid)
+                .HasPrincipalKey(u => u.Userid);
 
             modelBuilder.Entity<Request>()
                 .HasOne(r => r.Master)
                 .WithMany()
-                .HasForeignKey(r => r.Masterid) 
-                .OnDelete(DeleteBehavior.Restrict);
-
-            
+                .HasForeignKey(r => r.Masterid)
+                .HasPrincipalKey(u => u.Userid);
         }
     }
 }

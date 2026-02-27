@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Uset_zayavok.Models.Request>
 
 @{
-    ViewBag.Title = "Список заявок - БытСервис";
+    ViewBag.Title = "Список заявок";
 }
 
 <div class="container">
@@ -29,13 +29,11 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    @* Обращаемся к свойствам объекта напрямую через точку *@
                     <td>@item.Requestid</td>
-                    <td>@(item.Startdate?.ToShortDateString() ?? "-")</td>
+                    <td>@(item.Startdate?.ToShortDateString())</td>
                     <td>@item.Hometechtype</td>
                     <td>@item.Hometechmodel</td>
                     <td>
-                        @* Логика смены цвета бейджа в зависимости от статуса *@
                         <span class="badge @(item.Requeststatus == "Готова к выдаче" ? "bg-success" : "bg-warning")">
                             @item.Requeststatus
                         </span>

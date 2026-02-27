@@ -26,11 +26,11 @@ public partial class Request
 
     public int? Clientid { get; set; }
 
-    [ForeignKey("Clientid")]
+   
     public virtual User? Client { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
-    [ForeignKey("Masterid")]
+   
     public virtual User? Master { get; set; }
 }

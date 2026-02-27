@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Uset_zayavok.Models;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Uset_zayavok.Data;
+using Uset_zayavok.Models;
+
 
 namespace Uset_zayavok.Controllers
 {
@@ -16,7 +17,7 @@ namespace Uset_zayavok.Controllers
 
         public IActionResult Index(string search)
         {
-            var requests = _context.Requests.AsQueryable();
+            var requests = _context.Requests.Include(r => r.Client).AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -27,4 +28,4 @@ namespace Uset_zayavok.Controllers
             return View(requests.ToList());
         }
     }
-} 
+}

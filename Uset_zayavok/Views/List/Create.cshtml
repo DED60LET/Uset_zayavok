@@ -1,0 +1,42 @@
+﻿@model Uset_zayavok.Models.Request
+
+<div class="card shadow-sm mt-3">
+    <div class="card-header bg-dark text-white">
+        <h4 class="mb-0">Новая заявка на ремонт</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Тип оборудования</label>
+                    <input asp-for="Hometechtype" class="form-control" placeholder="Например: Фен" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Модель</label>
+                    <input asp-for="Hometechmodel" class="form-control" placeholder="Например: Dyson v10" required />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Описание проблемы</label>
+                <textarea asp-for="Problemdescryption" class="form-control" rows="3" placeholder="Что сломалось?"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Клиент</label>
+                <select asp-for="Clientid" class="form-select" required>
+                    <option value="">-- Выберите из списка --</option>
+                    @foreach (var client in ViewBag.Clients)
+                    {
+                        <option value="@client.Userid">@client.Fio</option>
+                    }
+                </select>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Добавить в базу</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>

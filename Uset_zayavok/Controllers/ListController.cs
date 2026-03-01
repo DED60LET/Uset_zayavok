@@ -27,5 +27,26 @@ namespace Uset_zayavok.Controllers
 
             return View(requests.ToList());
         }
+
+        public IActionResult Create()
+        {
+            ViewBag.Clients = _context.Users.Where(u => u.Type == "Заказчик").ToList();
+            return View();
+
+        }
+        [HttpPost]
+        public IActionResult Create(Request request)
+        {
+            int nextId = _context.Requests.Any() ? _context.Requests.Max(r => r.Requestid) + 1 : 1;
+            request.Requestid = nextId;
+
+            request.Startdate = DateOnly.FromDateTime(DateTime.Now);
+            request.Requeststatus = "Новая заявка";
+
+            _context.Requests.Add(request);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
     }
 }

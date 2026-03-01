@@ -60,5 +60,46 @@ namespace Uset_zayavok.Controllers
             return View(stats);
         }
 
+        public IActionResult Edit(int id)
+        {
+            var request = _context.Requests.Find(id);
+            if (request == null) return NotFound();
+            ViewBag.Statuses = new List<string>
+             {
+            "Новая заявка",
+            "В процессе ремонта",
+            "Готова к выдаче",
+            "Завершена"
+            };
+
+            return View(request);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Request request)
+        {
+            if (id != request.Requestid) return NotFound();
+
+            try
+            {
+                var dbEntry = _context.Requests.Find(id);
+                if (dbEntry == null) return NotFound();
+                dbEntry.Requeststatus = request.Requeststatus;
+                dbEntry.Problemdescryption = request.Problemdescryption;
+                dbEntry.Repairparts = request.Repairparts;
+                if (request.Requeststatus == "Готова к выдаче")
+                {
+                    dbEntry.Completiondate = DateOnly.FromDateTime(DateTime.Now);
+                }
+
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View(request);
+            }
+        }
     }
-}
+
+} 

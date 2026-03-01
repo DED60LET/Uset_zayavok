@@ -1,0 +1,45 @@
+﻿@model Uset_zayavok.Models.Request
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h4>Редактирование заявки №@Model.Requestid</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit">
+                <input type="hidden" asp-for="Requestid" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Техника</label>
+                        <input class="form-control" value="@Model.Hometechtype (@Model.Hometechmodel)" readonly />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label font-weight-bold">Статус работы</label>
+                        <select asp-for="Requeststatus" class="form-select border-primary">
+                            @foreach (var status in ViewBag.Statuses)
+                            {
+                                <option value="@status">@status</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Описание проблемы</label>
+                    <textarea asp-for="Problemdescryption" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label font-weight-bold">Запчасти / Заметки мастера</label>
+                    <input asp-for="Repairparts" class="form-control" placeholder="Какие детали заменены..." />
+                </div>
+
+                <div class="mt-4 border-top pt-3">
+                    <button type="submit" class="btn btn-success px-4">Сохранить</button>
+                    <a asp-action="Index" class="btn btn-secondary px-4">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

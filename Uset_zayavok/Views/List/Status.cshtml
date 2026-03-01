@@ -1,0 +1,38 @@
+﻿@model Dictionary<string, int>
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Статистика и статусы заявок</h2>
+
+    <div class="alert alert-info shadow-sm text-center">
+        <h4>Всего зарегистрировано заявок: <strong>@ViewBag.TotalRequests</strong></h4>
+    </div>
+
+    <div class="row mt-4">
+        @foreach (var status in Model)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-muted">@status.Key</h5>
+                        <p class="display-4 font-weight-bold text-primary">@status.Value</p>
+                        
+                        @{
+                           
+                            string progressColor = status.Key == "Готова к выдаче" ? "bg-success" : 
+                                                 status.Key == "В процессе ремонта" ? "bg-warning" : "bg-secondary";
+                        }
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar @progressColor" role="progressbar" 
+                                 style="width: @(ViewBag.TotalRequests > 0 ? (status.Value * 100 / ViewBag.TotalRequests) : 0)%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="text-center mt-5">
+        <a asp-action="Index" class="btn btn-outline-dark px-5">Перейти к полному списку</a>
+    </div>
+</div>

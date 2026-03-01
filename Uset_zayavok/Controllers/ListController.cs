@@ -48,5 +48,17 @@ namespace Uset_zayavok.Controllers
 
             return RedirectToAction("Index");
         }
+
+        public IActionResult Statuses()
+        {
+            var stats = _context.Requests
+        .GroupBy(r => r.Requeststatus)
+        .Select(g => new { Status = g.Key ?? "Не указан", Count = g.Count() })
+        .ToDictionary(x => x.Status, x => x.Count);
+
+            ViewBag.TotalRequests = _context.Requests.Count();
+            return View(stats);
+        }
+
     }
 }

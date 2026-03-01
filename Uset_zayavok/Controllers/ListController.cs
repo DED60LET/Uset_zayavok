@@ -49,7 +49,7 @@ namespace Uset_zayavok.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Statuses()
+        public IActionResult Status()
         {
             var stats = _context.Requests
         .GroupBy(r => r.Requeststatus)

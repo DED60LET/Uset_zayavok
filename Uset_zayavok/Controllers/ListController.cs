@@ -100,6 +100,32 @@ namespace Uset_zayavok.Controllers
                 return View(request);
             }
         }
+        [HttpPost]
+       
+        public IActionResult Post(int id, Request request)
+        {
+            if (id != request.Masterid) return NotFound();
+
+            try
+            {
+                var dbEntry = _context.Requests.Find(id);
+                if (dbEntry == null) return NotFound();
+                dbEntry.Requeststatus = request.Requeststatus;
+                dbEntry.Problemdescryption = request.Problemdescryption;
+                dbEntry.Repairparts = request.Repairparts;
+                if (request.Requeststatus == "-")
+                {
+                    dbEntry.Completiondate = DateOnly.FromDateTime(DateTime.Now);
+                }
+
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return View(request);
+            }
+        }
     }
 
 } 

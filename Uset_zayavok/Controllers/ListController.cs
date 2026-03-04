@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using Uset_zayavok.Models;
@@ -6,6 +7,7 @@ using Uset_zayavok.Models;
 
 namespace Uset_zayavok.Controllers
 {
+    [Authorize]
     public class ListController : Controller
     {
         private readonly PostgresContext _context;

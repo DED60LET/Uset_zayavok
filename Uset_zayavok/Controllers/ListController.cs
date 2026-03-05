@@ -79,8 +79,10 @@ namespace Uset_zayavok.Controllers
             return View(stats);
         }
 
+        [Authorize(Roles = "Мастер,Администратор")]
         public IActionResult Edit(int id)
         {
+            
             var request = _context.Requests.Find(id);
             if (request == null) return NotFound();
             ViewBag.Statuses = new List<string>

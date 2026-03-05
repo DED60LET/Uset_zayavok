@@ -39,7 +39,14 @@
                         </span>
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Requestid" class="btn btn-sm btn-info">Редактировать</a>
+                        @if (User.IsInRole("Мастер") || User.IsInRole("Администратор"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Requestid" class="btn btn-sm btn-info">Редактировать</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Только просмотр</span>
+                        }
                     </td>
                 </tr>
             }

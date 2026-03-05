@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using System.Security.Claims;
 using Uset_zayavok.Models;
 
 
@@ -19,8 +19,25 @@ namespace Uset_zayavok.Controllers
 
         public IActionResult Index(string search)
         {
+           
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim)) return RedirectToAction("Login", "Account");
+
+            int currentUserId = int.Parse(userIdClaim);
+
+            
             var requests = _context.Requests.Include(r => r.Client).AsQueryable();
 
+            if (userRole == "Заказчик")
+            {
+                
+                requests = requests.Where(r => r.Clientid == currentUserId);
+            }
+          
+
+           
             if (!string.IsNullOrEmpty(search))
             {
                 requests = requests.Where(r => r.Hometechmodel.Contains(search) ||

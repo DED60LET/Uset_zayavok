@@ -68,14 +68,37 @@ namespace Uset_zayavok.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
         public IActionResult Status()
         {
+            
             var stats = _context.Requests
-        .GroupBy(r => r.Requeststatus)
-        .Select(g => new { Status = g.Key ?? "Не указан", Count = g.Count() })
-        .ToDictionary(x => x.Status, x => x.Count);
+                .GroupBy(r => r.Requeststatus)
+                .Select(g => new { Status = g.Key ?? "Не указан", Count = g.Count() })
+                .ToDictionary(x => x.Status, x => x.Count);
 
+            
             ViewBag.TotalRequests = _context.Requests.Count();
+
+            ViewBag.TypeStats = _context.Requests
+                .GroupBy(r => r.Hometechtype)
+                .Select(g => new { Type = g.Key ?? "Не определено", Count = g.Count() })
+                .ToDictionary(x => x.Type, x => x.Count);
+
+            
+            var completed = _context.Requests
+                .Where(r => r.Startdate != null && r.Completiondate != null)
+                .ToList();
+
+            double avgDays = 0;
+            if (completed.Any())
+            {
+                avgDays = completed.Average(r =>
+                    (r.Completiondate.Value.ToDateTime(TimeOnly.MinValue) -
+                     r.Startdate.Value.ToDateTime(TimeOnly.MinValue)).TotalDays);
+            }
+            ViewBag.AverageTime = Math.Round(avgDays, 1);
+
             return View(stats);
         }
 

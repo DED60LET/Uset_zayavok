@@ -31,26 +31,26 @@
             </div>
         }
     </div>
+    <div class="row text-center mb-4">
+        <div class="col-md-6">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h3>@ViewBag.CompletedCount</h3>
+                    <p>Выполнено заявок </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h3>@ViewBag.AverageTime дней</h3>
+                    <p>Среднее время ремонта </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="text-center mt-5">
         <a asp-action="Index" class="btn btn-outline-dark px-5">Перейти к полному списку</a>
-    </div>
-</div>
-<div class="row text-center mb-4">
-    <div class="col-md-6">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <h3>@ViewBag.CompletedCount</h3>
-                <p>Выполнено заявок </p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card bg-warning text-dark">
-            <div class="card-body">
-                <h3>@ViewBag.AverageTime дней</h3>
-                <p>Среднее время ремонта </p>
-            </div>
-        </div>
     </div>
 </div>

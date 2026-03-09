@@ -77,7 +77,10 @@ namespace Uset_zayavok.Controllers
                 .Select(g => new { Status = g.Key ?? "Не указан", Count = g.Count() })
                 .ToDictionary(x => x.Status, x => x.Count);
 
-            
+            ViewBag.CompletedCount = _context.Requests
+        .Count(r => r.Requeststatus == "Готова к выдаче" || r.Requeststatus == "Завершена");
+
+
             ViewBag.TotalRequests = _context.Requests.Count();
 
             ViewBag.TypeStats = _context.Requests

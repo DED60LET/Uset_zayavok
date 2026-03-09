@@ -105,7 +105,7 @@ namespace Uset_zayavok.Controllers
             return View(stats);
         }
 
-        [Authorize(Roles = "Мастер,Администратор")]
+        [Authorize(Roles = "Мастер,Администратор,Менеджер")]
         public IActionResult Edit(int id)
         {
             
@@ -118,6 +118,8 @@ namespace Uset_zayavok.Controllers
             "Готова к выдаче",
             "Завершена"
             };
+
+            ViewBag.Masters = _context.Users.Where(u => u.Type == "Мастер").ToList();
 
             return View(request);
         }

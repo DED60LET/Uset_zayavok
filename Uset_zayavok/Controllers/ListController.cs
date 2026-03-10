@@ -127,37 +127,28 @@ namespace Uset_zayavok.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Request request)
         {
-            if (id != request.Requestid) return NotFound();
+            var request = _context.Requests.Find(id);
+            if (request == null) return NotFound();
 
-            try
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            int currentUserId = int.Parse(userIdClaim);
+
+
+            if (userRole == "Заказчик")
             {
-                var dbEntry = _context.Requests.Find(id);
-                if (dbEntry == null) return NotFound();
-                dbEntry.Requeststatus = request.Requeststatus;
-                dbEntry.Problemdescryption = request.Problemdescryption;
-                dbEntry.Repairparts = request.Repairparts;
-                if (request.Requeststatus == "Готова к выдаче")
+                if (request.Clientid != currentUserId || request.Requeststatus != "Новая заявка")
                 {
-                    dbEntry.Completiondate = DateOnly.FromDateTime(DateTime.Now);
-                }
-
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
+                    return Forbid(); 
             }
-            catch
-            {
-                return View(request);
-            }
-        }
-        [HttpGet]
-        public IActionResult Employees()
-        {
-            var staff = _context.Users
-                .Where(u => u.Type != "Заказчик")
-                .ToList();
 
-            return View(staff);
+            ViewBag.Masters = _context.Users.Where(u => u.Type == "Мастер").ToList();
+            ViewBag.Statuses = new List<string> { "Новая заявка", "В процессе ремонта", "Ожидание запчастей", "Готова к выдаче" };
+            ViewBag.Priorities = new List<string> { "Низкий", "Средний", "Высокий" };
+
+            return View(request);
         }
     }
+       
 
-} 
+}

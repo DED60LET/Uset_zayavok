@@ -33,4 +33,8 @@ public partial class Request
 
    
     public virtual User? Master { get; set; }
+
+    public string? Priority { get; set; } 
+    public string? MasterReport { get; set; } 
+    public string? TimeSpent { get; set; }
 }

@@ -17,32 +17,41 @@ namespace Uset_zayavok.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string search)
+        public IActionResult Index(string search, string statusFilter, string typeFilter)
         {
-           
             var userIdClaim = User.FindFirst("UserId")?.Value;
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
             if (string.IsNullOrEmpty(userIdClaim)) return RedirectToAction("Login", "Account");
-
             int currentUserId = int.Parse(userIdClaim);
 
-            
-            var requests = _context.Requests.Include(r => r.Client).AsQueryable();
+           
+            var requests = _context.Requests.Include(r => r.Client).Include(r => r.Master).AsQueryable();
 
+          
             if (userRole == "Заказчик")
             {
-                
                 requests = requests.Where(r => r.Clientid == currentUserId);
             }
-          
 
-           
             if (!string.IsNullOrEmpty(search))
             {
-                requests = requests.Where(r => r.Hometechmodel.Contains(search) ||
-                                             r.Requestid.ToString() == search);
+                requests = requests.Where(r => r.Hometechmodel.Contains(search) || r.Requestid.ToString() == search);
             }
+
+           
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                requests = requests.Where(r => r.Requeststatus == statusFilter);
+            }
+
+         
+            if (!string.IsNullOrEmpty(typeFilter))
+            {
+                requests = requests.Where(r => r.Hometechtype == typeFilter);
+            }
+
+          
+            ViewBag.Types = _context.Requests.Select(r => r.Hometechtype).Distinct().ToList();
 
             return View(requests.ToList());
         }

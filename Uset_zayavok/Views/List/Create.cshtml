@@ -1,40 +1,57 @@
 ﻿@model Uset_zayavok.Models.Request
 
-<form asp-action="Create" method="post" class="mt-4">
+<form asp-action="Create" method="post" class="mt-4 shadow p-4 bg-white rounded">
     <div asp-validation-summary="ModelOnly" class="text-danger fw-bold mb-3"></div>
 
     <div class="mb-3">
-        <label class="form-label">Тип техники</label>
-        <input asp-for="Hometechtype" class="form-control" required />
+        <label class="form-label fw-bold">Тип техники</label>
+        <input asp-for="Hometechtype" class="form-control" placeholder="Например: Стиральная машина" required />
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Модель</label>
-        <input asp-for="Hometechmodel" class="form-control" required />
+        <label class="form-label fw-bold">Модель</label>
+        <input asp-for="Hometechmodel" class="form-control" placeholder="Например: Samsung WF-123" required />
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Описание проблемы</label>
-        <textarea asp-for="Problemdescryption" class="form-control" required></textarea>
+        <label class="form-label fw-bold">Описание проблемы</label>
+        <textarea asp-for="Problemdescryption" class="form-control" rows="3" placeholder="Опишите, что именно сломалось..." required></textarea>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Назначить мастера (необязательно)</label>
-        <select asp-for="Masterid" class="form-select" asp-items="@(new SelectList(ViewBag.Masters, "Userid", "Fio"))">
-            <option value="">-- Оставить без мастера --</option>
-        </select>
-        <span asp-validation-for="Masterid" class="text-danger"></span>
-    </div>
+    @* ПОЛЯ ДЛЯ ПЕРСОНАЛА *@
+    @if (User.IsInRole("Менеджер") || User.IsInRole("Администратор"))
+    {
+        <div class="card bg-light mb-3">
+            <div class="card-body">
+                <h6 class="card-title text-muted border-bottom pb-2">Управление (Только для сотрудников)</h6>
 
-    <div class="mb-3">
-        <label class="form-label">Приоритет</label>
-        <select asp-for="Priority" class="form-select">
-            <option value="Низкий">Низкий</option>
-            <option value="Средний" selected>Средний</option>
-            <option value="Высокий">Высокий</option>
-        </select>
-    </div>
+                <div class="mb-3">
+                    <label class="form-label">Назначить мастера</label>
+                    <select asp-for="Masterid" class="form-select" asp-items="@(new SelectList(ViewBag.Masters, "Userid", "Fio"))">
+                        <option value="">-- Оставить без мастера --</option>
+                    </select>
+                </div>
 
-    <button type="submit" class="btn btn-primary">Создать заявку</button>
-    <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+                <div class="mb-3">
+                    <label class="form-label">Приоритет</label>
+                    <select asp-for="Priority" class="form-select">
+                        <option value="Низкий">Низкий</option>
+                        <option value="Средний" selected>Средний</option>
+                        <option value="Высокий">Высокий</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+       
+        <input type="hidden" asp-for="Priority" value="Низкий" />
+        
+    }
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary px-4">Создать заявку</button>
+        <a asp-action="Index" class="btn btn-secondary px-4">Отмена</a>
+    </div>
 </form>

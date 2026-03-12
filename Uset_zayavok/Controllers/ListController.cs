@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Uset_zayavok.Models;
 
-
 namespace Uset_zayavok.Controllers
 {
     [Authorize]
@@ -24,7 +23,6 @@ namespace Uset_zayavok.Controllers
             if (string.IsNullOrEmpty(userIdClaim)) return RedirectToAction("Login", "Account");
             int currentUserId = int.Parse(userIdClaim);
 
-
             var requests = _context.Requests.Include(r => r.Client).Include(r => r.Master).AsQueryable();
 
 
@@ -32,43 +30,49 @@ namespace Uset_zayavok.Controllers
             {
                 requests = requests.Where(r => r.Clientid == currentUserId);
             }
+            else if (userRole == "Мастер")
+            {
+
+                requests = requests.Where(r => r.Masterid == currentUserId);
+            }
+
 
             if (!string.IsNullOrEmpty(search))
             {
                 requests = requests.Where(r => r.Hometechmodel.Contains(search) || r.Requestid.ToString() == search);
             }
-
-
             if (!string.IsNullOrEmpty(statusFilter))
             {
                 requests = requests.Where(r => r.Requeststatus == statusFilter);
             }
-
-
             if (!string.IsNullOrEmpty(typeFilter))
             {
                 requests = requests.Where(r => r.Hometechtype == typeFilter);
             }
 
-
             ViewBag.Types = _context.Requests.Select(r => r.Hometechtype).Distinct().ToList();
-
             return View(requests.ToList());
         }
 
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Masters = _context.Users
-                .Where(u => u.Type == "Мастер")
-                .ToList();
-
+            ViewBag.Masters = _context.Users.Where(u => u.Type == "Мастер").ToList();
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Request request)
         {
+
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (userIdClaim != null)
+            {
+                request.Clientid = int.Parse(userIdClaim);
+            }
+
+
             int nextId = _context.Requests.Any() ? _context.Requests.Max(r => r.Requestid) + 1 : 1;
             request.Requestid = nextId;
 
@@ -89,11 +93,7 @@ namespace Uset_zayavok.Controllers
                 }
             }
 
-           
-            ViewBag.Masters = _context.Users
-                .Where(u => u.Type == "Мастер")
-                .ToList();
-
+            ViewBag.Masters = _context.Users.Where(u => u.Type == "Мастер").ToList();
             return View(request);
         }
 
@@ -107,16 +107,9 @@ namespace Uset_zayavok.Controllers
                 .ToDictionary(x => x.Status, x => x.Count);
 
             ViewBag.CompletedCount = _context.Requests
-        .Count(r => r.Requeststatus == "Готова к выдаче" || r.Requeststatus == "Завершена");
-
+                .Count(r => r.Requeststatus == "Готова к выдаче" || r.Requeststatus == "Завершена");
 
             ViewBag.TotalRequests = _context.Requests.Count();
-
-            ViewBag.TypeStats = _context.Requests
-                .GroupBy(r => r.Hometechtype)
-                .Select(g => new { Type = g.Key ?? "Не определено", Count = g.Count() })
-                .ToDictionary(x => x.Type, x => x.Count);
-
 
             var completed = _context.Requests
                 .Where(r => r.Startdate != null && r.Completiondate != null)
@@ -130,38 +123,50 @@ namespace Uset_zayavok.Controllers
                      r.Startdate.Value.ToDateTime(TimeOnly.MinValue)).TotalDays);
             }
             ViewBag.AverageTime = Math.Round(avgDays, 1);
+            var masterStats = _context.Requests
+    .Include(r => r.Master)
+    .Where(r => r.Masterid != null)
+    .GroupBy(r => r.Master.Fio)
+    .Select(g => new {
+        Name = g.Key,
+        Total = g.Count(),
+        Done = g.Count(r => r.Requeststatus == "Готова к выдаче" || r.Requeststatus == "Завершена")
+    })
+    .ToList();
+
+            ViewBag.MasterStats = masterStats;
 
             return View(stats);
         }
 
-        [Authorize(Roles = "Мастер,Администратор,Менеджер")]
+
+        [Authorize(Roles = "Заказчик,Мастер,Администратор,Менеджер")]
+        [HttpGet]
         public IActionResult Edit(int id)
         {
-
             var request = _context.Requests.Find(id);
             if (request == null) return NotFound();
-            ViewBag.Statuses = new List<string>
-             {
-            "Новая заявка",
-            "В процессе ремонта",
-            "Готова к выдаче",
-            "Завершена"
-            };
 
+            ViewBag.Statuses = new List<string> { "Новая заявка", "В процессе ремонта", "Готова к выдаче", "Завершена" };
             ViewBag.Masters = _context.Users.Where(u => u.Type == "Мастер").ToList();
 
             return View(request);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Request model) 
+        [Authorize(Roles = "Заказчик,Мастер,Администратор,Менеджер")]
+        public IActionResult Edit(int id, Request model)
         {
-           
             var existingRequest = _context.Requests.Find(id);
+            if (existingRequest == null) return NotFound();
 
-            if (existingRequest == null)
+            
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (userRole == "Заказчик" && existingRequest.Clientid != int.Parse(userIdClaim))
             {
-                return NotFound(); 
+                return Forbid(); 
             }
 
             if (ModelState.IsValid)
@@ -170,19 +175,34 @@ namespace Uset_zayavok.Controllers
                 {
                     
                     existingRequest.Requeststatus = model.Requeststatus;
-                 
-                    existingRequest.Masterid = model.Masterid;
-                    existingRequest.Priority = model.Priority;
-                    existingRequest.TimeSpent = model.TimeSpent;
+
+                
+                    if (userRole == "Менеджер" || userRole == "Администратор")
+                    {
+                        existingRequest.Masterid = model.Masterid;
+                        existingRequest.Priority = model.Priority;
+                        existingRequest.Problemdescryption = model.Problemdescryption;
+                    }
+
+                  
+                    if (userRole == "Мастер" || userRole == "Менеджер" || userRole == "Администратор")
+                    {
+                        existingRequest.Repairparts = model.Repairparts;
+                        existingRequest.TimeSpent = model.TimeSpent;
+                    }
 
                     
                     if (model.Requeststatus == "Готова к выдаче")
                     {
                         existingRequest.Completiondate = DateOnly.FromDateTime(DateTime.Now);
                     }
+                    else if (model.Requeststatus != "Завершена" && model.Requeststatus != "Готова к выдаче")
+                    {
+                        existingRequest.Completiondate = null;
+                    }
 
                     _context.SaveChanges();
-                    return RedirectToAction(nameof(Index)); 
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
@@ -190,12 +210,54 @@ namespace Uset_zayavok.Controllers
                 }
             }
 
-           
+            ViewBag.Statuses = new List<string> { "Новая заявка", "В процессе ремонта", "Готова к выдаче", "Завершена" };
             ViewBag.Masters = _context.Users.Where(u => u.Type == "Мастер").ToList();
-
-            return View(model); 
+            return View(model);
         }
+        public IActionResult Delete(int id)
+        {
+            
+            var request = _context.Requests
+                .Include(r => r.Comments) 
+                .FirstOrDefault(r => r.Requestid == id);
 
+            if (request == null)
+            {
+                return NotFound();
+            }
 
+            try
+            {
+               
+                var comments = _context.Comments.Where(c => c.Requestid == id);
+                _context.Comments.RemoveRange(comments);
+
+              
+                _context.Requests.Remove(request);
+
+  
+                _context.SaveChanges();
+
+                TempData["Message"] = "Заявка №" + id + " успешно удалена.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Ошибка при удалении: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        public IActionResult Details(int id)
+        {
+            var request = _context.Requests
+                .Include(r => r.Client)
+                .Include(r => r.Master)
+                .Include(r => r.Comments) 
+                .FirstOrDefault(r => r.Requestid == id);
+
+            if (request == null) return NotFound();
+
+            return View(request);
+        }
     }
 }

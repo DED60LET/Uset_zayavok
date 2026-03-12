@@ -56,13 +56,17 @@ namespace Uset_zayavok.Controllers
             return View(requests.ToList());
         }
 
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Clients = _context.Users.Where(u => u.Type == "Заказчик").ToList();
-            return View();
+            ViewBag.Masters = _context.Users
+                .Where(u => u.Type == "Мастер")
+                .ToList();
 
+            return View();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Request request)
         {
             int nextId = _context.Requests.Any() ? _context.Requests.Max(r => r.Requestid) + 1 : 1;
@@ -71,10 +75,26 @@ namespace Uset_zayavok.Controllers
             request.Startdate = DateOnly.FromDateTime(DateTime.Now);
             request.Requeststatus = "Новая заявка";
 
-            _context.Requests.Add(request);
-            _context.SaveChanges();
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Requests.Add(request);
+                    _context.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Ошибка БД: " + ex.Message);
+                }
+            }
 
-            return RedirectToAction("Index");
+           
+            ViewBag.Masters = _context.Users
+                .Where(u => u.Type == "Мастер")
+                .ToList();
+
+            return View(request);
         }
 
         [HttpGet]

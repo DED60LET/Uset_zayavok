@@ -1,4 +1,5 @@
 ﻿@model Uset_zayavok.Models.Request
+
 @if (User.IsInRole("Менеджер"))
 {
     <div class="alert alert-warning">
@@ -6,6 +7,7 @@
         для фиксации продления срока или переназначить мастера.
     </div>
 }
+
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-info text-white">
@@ -14,6 +16,12 @@
         <div class="card-body">
             <form asp-action="Edit">
                 <input type="hidden" asp-for="Requestid" />
+           
+                @if (!User.IsInRole("Менеджер") && !User.IsInRole("Администратор"))
+                {
+                    <input type="hidden" asp-for="Masterid" />
+                    <input type="hidden" asp-for="Problemdescryption" />
+                }
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -31,19 +39,47 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label font-weight-bold">Описание проблемы</label>
-                    <textarea asp-for="Problemdescryption" class="form-control" rows="3"></textarea>
-                </div>
+             
+                @if (User.IsInRole("Менеджер") || User.IsInRole("Администратор"))
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Назначить/Сменить мастера</label>
+                        <select asp-for="Masterid" class="form-select"
+                                asp-items="@(new SelectList(ViewBag.Masters, "Userid", "Fio"))">
+                            <option value="">-- Мастер не назначен --</option>
+                        </select>
+                    </div>
 
-                <div class="mb-3">
-                    <label class="form-label font-weight-bold">Запчасти / Заметки мастера</label>
-                    <input asp-for="Repairparts" class="form-control" placeholder="Какие детали заменены..." />
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Описание проблемы</label>
+                        <textarea asp-for="Problemdescryption" class="form-control" rows="3"></textarea>
+                    </div>
+                }
+                else
+                {
+                   
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold text-muted">Описание проблемы</label>
+                        <div class="p-2 bg-light border rounded">@Model.Problemdescryption</div>
+                    </div>
+                }
 
-                <div class="mt-4 border-top pt-3">
-                    <button type="submit" class="btn btn-success px-4">Сохранить</button>
-                    <a asp-action="Index" class="btn btn-secondary px-4">Отмена</a>
+                
+                @if (User.IsInRole("Мастер") || User.IsInRole("Менеджер"))
+                {
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold text-success">Запчасти / Заметки мастера</label>
+                        <input asp-for="Repairparts" class="form-control border-success" placeholder="Какие детали заменены..." />
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="Repairparts" />
+                }
+
+                <div class="mt-4 border-top pt-3 text-end">
+                    <a asp-action="Index" class="btn btn-secondary px-4 me-2">Отмена</a>
+                    <button type="submit" class="btn btn-success px-5">Сохранить</button>
                 </div>
             </form>
         </div>

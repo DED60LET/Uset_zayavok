@@ -24,10 +24,10 @@ namespace Uset_zayavok.Controllers
             if (string.IsNullOrEmpty(userIdClaim)) return RedirectToAction("Login", "Account");
             int currentUserId = int.Parse(userIdClaim);
 
-           
+
             var requests = _context.Requests.Include(r => r.Client).Include(r => r.Master).AsQueryable();
 
-          
+
             if (userRole == "Заказчик")
             {
                 requests = requests.Where(r => r.Clientid == currentUserId);
@@ -38,19 +38,19 @@ namespace Uset_zayavok.Controllers
                 requests = requests.Where(r => r.Hometechmodel.Contains(search) || r.Requestid.ToString() == search);
             }
 
-           
+
             if (!string.IsNullOrEmpty(statusFilter))
             {
                 requests = requests.Where(r => r.Requeststatus == statusFilter);
             }
 
-         
+
             if (!string.IsNullOrEmpty(typeFilter))
             {
                 requests = requests.Where(r => r.Hometechtype == typeFilter);
             }
 
-          
+
             ViewBag.Types = _context.Requests.Select(r => r.Hometechtype).Distinct().ToList();
 
             return View(requests.ToList());
@@ -80,7 +80,7 @@ namespace Uset_zayavok.Controllers
         [HttpGet]
         public IActionResult Status()
         {
-            
+
             var stats = _context.Requests
                 .GroupBy(r => r.Requeststatus)
                 .Select(g => new { Status = g.Key ?? "Не указан", Count = g.Count() })
@@ -97,7 +97,7 @@ namespace Uset_zayavok.Controllers
                 .Select(g => new { Type = g.Key ?? "Не определено", Count = g.Count() })
                 .ToDictionary(x => x.Type, x => x.Count);
 
-            
+
             var completed = _context.Requests
                 .Where(r => r.Startdate != null && r.Completiondate != null)
                 .ToList();
@@ -117,7 +117,7 @@ namespace Uset_zayavok.Controllers
         [Authorize(Roles = "Мастер,Администратор,Менеджер")]
         public IActionResult Edit(int id)
         {
-            
+
             var request = _context.Requests.Find(id);
             if (request == null) return NotFound();
             ViewBag.Statuses = new List<string>
@@ -134,30 +134,48 @@ namespace Uset_zayavok.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Request request)
+        public IActionResult Edit(int id, Request model) 
         {
-            var request = _context.Requests.Find(id);
-            if (request == null) return NotFound();
+           
+            var existingRequest = _context.Requests.Find(id);
 
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            int currentUserId = int.Parse(userIdClaim);
-
-
-            if (userRole == "Заказчик")
+            if (existingRequest == null)
             {
-                if (request.Clientid != currentUserId || request.Requeststatus != "Новая заявка")
-                {
-                    return Forbid(); 
+                return NotFound(); 
             }
 
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    
+                    existingRequest.Requeststatus = model.Requeststatus;
+                 
+                    existingRequest.Masterid = model.Masterid;
+                    existingRequest.Priority = model.Priority;
+                    existingRequest.TimeSpent = model.TimeSpent;
+
+                    
+                    if (model.Requeststatus == "Готова к выдаче")
+                    {
+                        existingRequest.Completiondate = DateOnly.FromDateTime(DateTime.Now);
+                    }
+
+                    _context.SaveChanges();
+                    return RedirectToAction(nameof(Index)); 
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Ошибка при сохранении: " + ex.Message);
+                }
+            }
+
+           
             ViewBag.Masters = _context.Users.Where(u => u.Type == "Мастер").ToList();
-            ViewBag.Statuses = new List<string> { "Новая заявка", "В процессе ремонта", "Ожидание запчастей", "Готова к выдаче" };
-            ViewBag.Priorities = new List<string> { "Низкий", "Средний", "Высокий" };
 
-            return View(request);
+            return View(model); 
         }
-    }
-       
 
+
+    }
 }

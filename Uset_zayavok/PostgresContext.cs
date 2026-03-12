@@ -59,6 +59,12 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Requestid)
                 .ValueGeneratedNever()
                 .HasColumnName("requestid");
+            entity.Property(e => e.MasterReport)
+          .HasColumnName("requestcomments");
+            entity.Property(e => e.Priority)
+          .HasColumnName("priority");
+            entity.Property(e => e.TimeSpent)
+          .HasColumnName("timespent");
             entity.Property(e => e.Clientid).HasColumnName("clientid");
             entity.Property(e => e.Completiondate).HasColumnName("completiondate");
             entity.Property(e => e.Hometechmodel)
